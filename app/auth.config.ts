@@ -1,25 +1,29 @@
-import { NextAuthConfig } from 'next-auth';
+import { NextAuthConfig } from 'next-auth'
 
 export const authConfig = {
   pages: {
     signIn: '/login',
   },
   providers: [
-    // added later in auth.ts since it requires bcrypt which is only compatible with Node.js
-    // while this file is also used in non-Node.js environments
+    // defined elsewhere for Node.js compatibility
   ],
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
-      let isLoggedIn = !!auth?.user;
-      let isOnDashboard = nextUrl.pathname.startsWith('/protected');
+      const isLoggedIn = !!auth?.user;
+      const isLoginPage = nextUrl.pathname === '/login';
+      const isProtectedPage = nextUrl.pathname.startsWith('/protected') || nextUrl.pathname === '/account';
 
-      if (isOnDashboard) {
-        if (isLoggedIn) return true;
-        return false; // Redirect unauthenticated users to login page
-      } else if (isLoggedIn) {
-        return Response.redirect(new URL('/protected', nextUrl));
+      // Trying to access login page while already logged in -> redirect to account
+      if (isLoginPage && isLoggedIn) {
+        return Response.redirect(new URL('/account', nextUrl));
       }
 
+      // Trying to access protected page while not logged in -> redirect to login
+      if (isProtectedPage && !isLoggedIn) {
+        return Response.redirect(new URL('/login', nextUrl));
+      }
+
+      // Allow everything else
       return true;
     },
   },
