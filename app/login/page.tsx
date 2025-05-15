@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Form } from 'app/form';
+import { Form } from 'app/login/login-form';
 import { SubmitButton } from 'app/submit-button';
 import { useState } from 'react';
 import { handleLogin } from './actions';
