@@ -36,7 +36,13 @@ export const {
           return null;
         }
 
-        const valid = await bcrypt.compare(credentials.password, user.password);
+        if (!user || typeof user.password !== 'string') {
+          console.warn('[Auth] Invalid user or missing password');
+          return null;
+        }
+
+        const valid = await bcrypt.compare(String(credentials.password), String(user.password));
+
         if (!valid) {
           console.warn('[Auth] Invalid password');
           return null;
