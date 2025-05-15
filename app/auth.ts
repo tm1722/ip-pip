@@ -1,21 +1,20 @@
 import NextAuth from 'next-auth';
-import Credentials from 'next-auth/providers/credentials';
-import { compare } from 'bcrypt-ts';
-import { getUser } from 'app/db';
-import { db } from '@/lib/db';
-import { authConfig } from 'app/auth.config';
+import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcrypt';
-
+import { db } from '@/lib/db';
 
 export const {
-  handlers: { GET, POST },
-  auth,
-  signIn,
-  signOut,
+  auth,         // used in middleware.ts or `getServerSession`
+  handlers: { GET, POST }, // API route handlers
+  signIn, signOut,
 } = NextAuth({
-  ...authConfig,
   providers: [
-    Credentials({
+    CredentialsProvider({
+      name: 'Credentials',
+      credentials: {
+        email: { label: 'Email', type: 'text' },
+        password: { label: 'Password', type: 'password' },
+      },
       async authorize(credentials) {
         console.log('[Auth] Received credentials:', credentials);
 
@@ -24,11 +23,16 @@ export const {
           return null;
         }
 
-        const result = await db.query('SELECT * FROM "User" WHERE email = $1', [credentials.email]);
-        const user = result.rows[0];
+        const result = await db.query(
+          'SELECT id, email, password FROM users WHERE email = $1',
+          [credentials.email]
+        );
 
-        if (!user) {
-          console.warn('[Auth] User not found');
+        const user = result.rows[0];
+        console.log('[Auth] Fetched user:', user);
+
+        if (!user || typeof user.password !== 'string') {
+          console.warn('[Auth] User not found or password invalid format');
           return null;
         }
 
@@ -38,9 +42,21 @@ export const {
           return null;
         }
 
-        console.log('[Auth] User authenticated successfully:', user.email);
+        console.log('[Auth] ✅ Authenticated:', user.email);
         return { id: user.id, email: user.email };
       },
     }),
   ],
+  pages: {
+    signIn: '/login',
+  },
+  session: {
+    strategy: 'jwt',
+  },
+  callbacks: {
+    async session({ session, token }) {
+      if (token?.sub) session.user.id = token.sub;
+      return session;
+    },
+  },
 });
