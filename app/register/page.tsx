@@ -10,6 +10,12 @@ export default function Login() {
     'use server';
     let email = formData.get('email') as string;
     let password = formData.get('password') as string;
+    
+    let first_name = formData.get('first_name') as string;
+    let last_name = formData.get('last_name') as string;
+    let date_of_birth = formData.get('date_of_birth') as string;
+    let place_of_occupation = formData.get('place_of_occupation') as string | null;
+    let education = formData.get('education') as string | null;
     let user = await getUser(email);
 
     if (user.length > 0) {
@@ -24,7 +30,26 @@ export default function Login() {
       log('User already exists');
       return 'User already exists'; // TODO: Handle errors with useFormStatus
     } else {
-      await createUser(email, password);
+      console.log('[CREATE USER] Arguments:', {
+        email,
+        password,
+        first_name,
+        last_name,
+        date_of_birth,
+        place_of_occupation,
+        education
+      });
+
+      await createUser({
+        email,
+        password,
+        first_name,
+        last_name,
+        date_of_birth,
+        place_of_occupation,
+        education,
+        user_type: 'User' // set automatically
+      });
       redirect('/login');
     }
   }
@@ -38,7 +63,17 @@ export default function Login() {
             Create an account with your email and password
           </p>
         </div>
-        <Form action={register}>
+        <Form action={register} includeAuthFields={false}>
+          <div className="p-4 space-y-4">
+            <input name="email" type="email" required placeholder="Email" className="..." />
+            <input name="password" type="password" required placeholder="Password" className="..." />
+            <input name="first_name" required placeholder="First Name" className="..." />
+            <input name="last_name" required placeholder="Last Name" className="..." />
+            <input name="date_of_birth" type="date" required className="..." />
+            <input name="place_of_occupation" placeholder="Place of Occupation" className="..." />
+            <input name="education" placeholder="Education" className="..." />
+          </div>
+
           <SubmitButton>Sign Up</SubmitButton>
           <p className="text-center text-sm text-gray-600">
             {'Already have an account? '}
@@ -48,6 +83,7 @@ export default function Login() {
             {' instead.'}
           </p>
         </Form>
+
       </div>
     </div>
   );
