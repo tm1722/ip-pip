@@ -3,6 +3,7 @@ import { Form } from 'app/form';
 import { redirect } from 'next/navigation';
 import { createUser, getUser } from 'app/db';
 import { SubmitButton } from 'app/submit-button';
+import { log } from 'console';
 
 export default function Login() {
   async function register(formData: FormData) {
@@ -12,6 +13,15 @@ export default function Login() {
     let user = await getUser(email);
 
     if (user.length > 0) {
+            return (
+              <div className="mb-4 rounded bg-red-100 p-3 text-sm text-red-700">
+              This user already exists.{' '}
+              <Link href="/forgot-password" className="font-semibold underline">
+                Did you by any chance forget your password?
+              </Link>
+              </div>
+            );
+      log('User already exists');
       return 'User already exists'; // TODO: Handle errors with useFormStatus
     } else {
       await createUser(email, password);
