@@ -24,7 +24,7 @@ export const {
         }
 
         const result = await db.query(
-          'SELECT id, email, password FROM users WHERE email = $1',
+          'SELECT id, email, password FROM "User" WHERE email = $1',
           [credentials.email]
         );
 

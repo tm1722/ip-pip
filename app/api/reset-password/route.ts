@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await db.query(
-      'UPDATE users SET password = $1 WHERE email = $2',
+      'UPDATE User SET password = $1 WHERE email = $2',
       [hashedPassword, email]
     );
 
