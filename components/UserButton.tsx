@@ -22,7 +22,7 @@ export function UserButton() {
     <div className="absolute top-4 right-4">
       {isLoggedIn ? (
         <Link
-          href="/protected"
+          href="/account"
           className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition flex items-center gap-1.5"
         >
           <FaUser />
